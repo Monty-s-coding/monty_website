@@ -1,0 +1,33 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    command: gunicorn web.wsgi:application --bind 0.0.0.0:8000
+    depends_on:
+      - db
+    container_name: dj_web
+    environment:
+      - DB_NAME=myproject
+      - DB_USER=myprojectuser
+      - DB_PASSWORD=myprojectpassword
+      - DB_HOST=db
+      - DB_PORT=5432
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: myproject
+      POSTGRES_USER: myprojectuser
+      POSTGRES_PASSWORD: myprojectpassword
+    container_name: db_web
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - web
+    container_name: ng_web
